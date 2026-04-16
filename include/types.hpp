@@ -7,12 +7,12 @@ using Price = std::uint32_t;
 using Qty = std::uint32_t;
 using Timestamp = std::uint64_t;
 
-enum class Side {
-	BUY,
-	SELL
+enum class Side : uint8_t {
+    BUY,
+    SELL
 };
 
-enum class OrderType {
-	LIMIT,
-	MARKET
+enum class OrderType : uint8_t {
+    LIMIT,
+    MARKET
 };
