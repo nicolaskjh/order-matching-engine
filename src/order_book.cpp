@@ -31,6 +31,40 @@ void OrderBook::match(Order& incoming, std::vector<Trade>& trades) {
 	}
 }
 
+OrderBook::Snapshot OrderBook::snapshot() const {
+	Snapshot view;
+
+	view.bids.reserve(bids.size());
+	for (const auto& [price, queue] : bids) {
+		Qty total_qty = 0;
+		for (const auto& order : queue) {
+			total_qty += order.remaining_qty;
+		}
+
+		view.bids.push_back(BookLevel{
+			.price = price,
+			.total_qty = total_qty,
+			.order_count = queue.size(),
+		});
+	}
+
+	view.asks.reserve(asks.size());
+	for (const auto& [price, queue] : asks) {
+		Qty total_qty = 0;
+		for (const auto& order : queue) {
+			total_qty += order.remaining_qty;
+		}
+
+		view.asks.push_back(BookLevel{
+			.price = price,
+			.total_qty = total_qty,
+			.order_count = queue.size(),
+		});
+	}
+
+	return view;
+}
+
 void OrderBook::match_buy(Order& incoming, std::vector<Trade>& trades) {
 	while (incoming.remaining_qty > 0 && !asks.empty()) {
 		auto best_ask_it = asks.begin();
