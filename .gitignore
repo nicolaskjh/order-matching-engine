@@ -39,3 +39,16 @@
 
 # debug information files
 *.dwo
+
+# CMake / build outputs
+build/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+compile_commands.json
+
+# macOS
+.DS_Store
+
+# VSCode
+.vscode/
