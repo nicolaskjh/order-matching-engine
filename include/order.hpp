@@ -2,7 +2,7 @@
 
 #include "types.hpp"
 
-struct alignas(64) Order {
+struct Order {
     OrderID id;          
     Timestamp timestamp; 
 
