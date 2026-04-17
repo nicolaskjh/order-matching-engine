@@ -7,12 +7,24 @@ void OrderBook::add_order(const Order& order) {
 		return;
 	}
 
-	if (order.side == Side::BUY) {
-		bids[order.price].push_back(order);
+	if (order_index.find(order.id) != order_index.end()) {
 		return;
 	}
 
-	asks[order.price].push_back(order);
+	if (order.side == Side::BUY) {
+		auto& queue = bids[order.price];
+		queue.push_back(order);
+		auto it = queue.end();
+		--it;
+		order_index.emplace(order.id, it);
+		return;
+	}
+
+	auto& queue = asks[order.price];
+	queue.push_back(order);
+	auto it = queue.end();
+	--it;
+	order_index.emplace(order.id, it);
 }
 
 void OrderBook::match(Order& incoming, std::vector<Trade>& trades) {
@@ -29,6 +41,15 @@ void OrderBook::match(Order& incoming, std::vector<Trade>& trades) {
 	if (incoming.type == OrderType::LIMIT && incoming.remaining_qty > 0) {
 		add_order(incoming);
 	}
+}
+
+std::optional<Order> OrderBook::find_order(OrderID id) const {
+	const auto it = order_index.find(id);
+	if (it == order_index.end()) {
+		return std::nullopt;
+	}
+
+	return *it->second;
 }
 
 OrderBook::Snapshot OrderBook::snapshot() const {
@@ -91,6 +112,7 @@ void OrderBook::match_buy(Order& incoming, std::vector<Trade>& trades) {
 			resting.remaining_qty -= fill_qty;
 
 			if (resting.remaining_qty == 0) {
+				order_index.erase(resting.id);
 				queue.pop_front();
 			}
 		}
@@ -127,6 +149,7 @@ void OrderBook::match_sell(Order& incoming, std::vector<Trade>& trades) {
 			resting.remaining_qty -= fill_qty;
 
 			if (resting.remaining_qty == 0) {
+				order_index.erase(resting.id);
 				queue.pop_front();
 			}
 		}
